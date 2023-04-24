@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:talk/helper/dialogs.dart';
+import 'package:talk/screens/auth/login_screen.dart';
 import '../main.dart';
 import '../models/chat_user.dart';
 
@@ -30,16 +32,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             SizedBox(width: mq.width, height: mq.height*.03 ),
-            ClipRRect(
+
+            // stack for showing icons over other icons
+            Stack(
+              children: [
+                ClipRRect(
+                  // profile picture
     borderRadius: BorderRadius.circular(mq.height*.1),
-            child: CachedNetworkImage(
-            height: mq.height * 0.2,
-            width: mq.height* 0.2,
-            fit: BoxFit.fill,
-            imageUrl: widget.user.image,
-            // placeholder: (context, url) => CircularProgressIndicator(),
-            errorWidget: (context, url, error) => const CircleAvatar(child: Icon(CupertinoIcons.person_alt),
-            ),),
+                child: CachedNetworkImage(
+                height: mq.height * 0.2,
+                width: mq.height* 0.2,
+                fit: BoxFit.fill,
+                imageUrl: widget.user.image,
+                // placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => const CircleAvatar(child: Icon(CupertinoIcons.person_alt),
+                ),),
+                ),
+                Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: MaterialButton(onPressed: (){}, child: Icon(Icons.edit, color: Colors.blue,), color: Colors.white ,shape: CircleBorder(),))
+              ],
             ),
 
             SizedBox( height: mq.height*.03 ),
@@ -63,9 +76,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),),
             SizedBox( height: mq.height*.03 ),
 
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(shape: StadiumBorder(), minimumSize: Size(mq.width* .4, mq.height*.05)),
-              onPressed: (){}, icon:Icon(Icons.edit) ,  label: Text("UPDATE", style: TextStyle(fontSize: 18),),)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(shape: StadiumBorder(), minimumSize: Size(mq.width* .3, mq.height*.05)),
+              onPressed: (){},  child: Text("UPDATE", style: TextStyle(fontSize: 18),),)
 
           ],
         ),
@@ -75,8 +88,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: EdgeInsets.only(bottom: 15, right: 10),
         child: FloatingActionButton.extended(
           onPressed: () async {
-            await FirebaseAuth.instance.signOut();
-            await GoogleSignIn().signOut();
+           Dialogs.showProgressBar(context);
+           // sign out from app
+           await FirebaseAuth.instance.signOut().then((value) async {
+             await GoogleSignIn().signOut().then((value) {
+               Navigator.pop(context);
+               Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+             });
+           });
+
           },
             icon: Icon(Icons.logout),
             label: Text("Logout"),
