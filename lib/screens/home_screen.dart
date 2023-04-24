@@ -1,10 +1,9 @@
-import 'dart:convert';
-import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:talk/screens/profile_screen.dart';
 import '../api/APIs.dart';
 import '../models/chat_user.dart';
 import '../widgets/chat_user_card.dart';
@@ -24,13 +23,18 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ChatUser> list = [];
   @override
   Widget build(BuildContext context) {
+    var list = [];
+
     return Scaffold(
-      appBar: AppBar(
+
+    appBar: AppBar(
         title: Text('Gupshup'),
-        leading: Icon(CupertinoIcons.person_crop_circle),
+        leading: Icon(CupertinoIcons.house_fill),
         actions: [
           IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-          IconButton(onPressed: () {}, icon: Icon(Icons.more_vert_rounded))
+          IconButton(onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(user: list[0],)));
+          }, icon: Icon(CupertinoIcons.person_crop_circle),)
         ],
       ),
       // drawer: Drawer(),
@@ -56,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
               // if some or all data is loaded then show it
               case ConnectionState.active:
               case ConnectionState.done:
-                var list = [];
                 final data = snapshot.data?.docs;
                 ;
                 list = data?.map((e) => ChatUser.fromJson(e.data())).toList() ??
